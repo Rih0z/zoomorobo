@@ -1,0 +1,130 @@
+//
+//Zone 3 Beta
+//
+
+float avex = 0;
+
+//指定した向きに向かせる関数
+float turnTo(float dir){
+	float heading, diff;
+
+	heading = direction_G;
+	//値を-180~180に変換
+	if(heading>180){
+		heading -= 360;
+	}
+	
+	heading -= dir;
+	//値を-180~180に変換	
+	if(heading>180){
+		heading -= 360;
+	}
+	if(heading<-180){
+		heading += 360;
+	}
+	
+	diff = -heading*5;			//P-制御
+	if(diff>200){
+		diff = 200;			//飽和
+	}
+	if(diff<-200){
+		diff = -200;			//飽和
+	}
+	return diff;
+}
+void zone3beta(){
+	static int countTurn = 0;
+	int done;
+	float speed0, diff;
+	float d;
+
+	avex = 0.9*avex + 0.1*compass.a.x;
+
+	switch (mode_G){
+		//setupはここ
+		case 0: 
+			countTurn = 0;
+			mode_G = 1;
+		//山探し(ここでは直進)
+		case 1: 
+			//登り始めたら
+			if(avex>4000) {
+				mode_G=2;
+			}
+			speed0 = 150;
+			diff = -0.02*compass.a.y; 		//P-制御(最急勾配方向へ)
+			break;
+		//山登り中
+		case 2: 
+			//登頂したら頂上の中心部まで進む
+			if ((avex<1500)&&(avex>-1500)){	
+				done = steadyState(200);	//200msは要調整
+			}
+			//頂上の中心部まで来たら停止
+			if (done == 1){	
+				speed0=0;
+				diff =0;
+				mode_G = 3;
+			}
+			else{
+				speed0 = 150;
+				diff = -0.02*compass.a.y; 	//P-制御(最急勾配方向へ)
+			}
+			break;
+		//500ms停止
+		case 3: 
+			speed0 = 0;
+			diff = 0;
+			done = steadyState(500);
+			if (done == 1){
+				mode_G = 4;
+			}
+			break;
+		//その場回転で1回転(東西南北で一時停止)
+		case 4: 
+			speed0 = 0;
+			//diff = turnTo(90);			//P-制御
+			d = 90 + 90*countTurn;
+			
+			if(d >= 360){
+				d = 0;
+			}
+			
+			diff = turnTo(d);
+			
+			if (abs(diff) <= 50){
+				diff = 0;
+				countTurn++;
+				if(countTurn == 4){
+					mode_G =5;
+				}
+			}
+			break;
+		//出口方向を向く
+		case 5:
+			diff = turnTo(270);
+			
+			if (abs(diff) <= 50){
+				diff = 0;
+				mode_G = 6;
+			}
+			break;
+		//最急降下方向へ降りる
+		case 6:
+			speed0 = 100;
+			//最急降下方向が向かって右45°にする
+			diff = -0.02*compass.a.x; 	//P-制御(最急勾配方向へ)
+			break;
+		//停止
+		case 99:
+			speed0 = 0;
+			diff = 0;
+			break;
+		default:
+			break;
+	}
+	motorL_G = speed0 + diff;
+	motorR_G = speed0 - diff;
+}
+
+
