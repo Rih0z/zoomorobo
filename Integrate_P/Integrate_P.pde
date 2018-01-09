@@ -34,7 +34,7 @@ void setup() {
   size(1024, 768);
   background(255);
   println(Serial.list());
-  port = new Serial(this, "/dev/ttyUSB0", 9600 );
+//  port = new Serial(this, "/dev/ttyUSB0", 9600 );
   // String arduinoPort = Serial.list()[1];
   // port = new Serial(this, arduinoPort, 9600 );
   //port = new Serial(this, "/dev/cu.usbserial-A90174UN", 9600 ); // シリアルポート名は各自の環境に合わせて適宜指定
