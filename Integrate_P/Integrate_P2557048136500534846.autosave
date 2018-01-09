@@ -5,7 +5,6 @@ int zoneNumber, mode, sonic, motor_L, motor_R, accel_X, accel_Y, accel_Z, geomag
 int CX=250, CY=250;
 int green, red, blue;
 int high, low;
-int i ; 
 float direction_G;
 
 int count = 0;
@@ -277,9 +276,10 @@ void drawVec(float x, float y, float z) {
 
 // 通信方式1
 void serialEvent(Serial p) { 
-
+int d;
   if ( p.available() >= 23 ) { 
     if ( p.read() == 'H' ) {
+      
       //RGB値
       red =  p.read();
       green = p.read();
