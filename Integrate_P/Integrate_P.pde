@@ -231,7 +231,7 @@ void CalcDisp(){
     colorBef= colorCheck_G;
   }
   print("ac_xyz = ");print(ac_xyz);print(" V = ");print(V);print(" dx = ");println(dx);
-  print("colorCount");println(colorCount);print("colorCheck_G)";println(colorCheck_G);
+  print("colorCount");println(colorCount);print("colorCheck_G");println(colorCheck_G);
 
 }
 void DrawZone3(){

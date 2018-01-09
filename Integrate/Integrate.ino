@@ -93,7 +93,7 @@ void loop() {
   timeNow_G = millis() - timeInit_G; 	//経過時間
   motors.setSpeeds(motorL_G, motorR_G); 	//左右モーターへの回転力入力
   direction_G = averageHeadingLP();	//Zumoが向いている角度を格納
-  sendDatar(); 				//データ送信
+  sendData(); 				//データ送信
 
   //Zumo buttonが押されていればtrue，そうでなければ false
   if (button.isPressed()) {
