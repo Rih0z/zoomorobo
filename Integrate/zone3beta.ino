@@ -26,6 +26,11 @@ float turnTo(float dir) {
 }
 void zone3beta()
 {
+  static int A2 = 1;//方向をセットするアルゴリズムで行く場合1に
+  static int A2blue = 50;
+  static int A2in = 110;
+  static int A2gol = 193;
+  static int A2red = 220;
   static int zoneNF = 0 ;
   static int pointF2 = 0 ;
   static int eFlag = 0 ;
@@ -62,13 +67,6 @@ void zone3beta()
     // mode_Gs = mode_G
     mode_G = 0 ;
   }
-  if(zoneNF == 0)
-  {
-    zoneNF = 1;
-    diff =  turnTo(110);
-    if (abs(diff) <= 50)
-      diff = 0 ;
-  }
   if (blackF)
     CheckB();
 
@@ -81,7 +79,7 @@ void zone3beta()
       if(zoneNF == 0)
       {
         zoneNF = 1;
-        diff =  turnTo(110);
+        diff =  turnTo(A2in);
         if (abs(diff) <= 10){
           diff = 0 ;
           mode_G = 1;
@@ -144,12 +142,26 @@ void zone3beta()
         redF = 0 ;
         blueF = 0 ;
       }
-      diff = -0.02 * abs(compass.a.x) + 0.01 * abs(compass.a.y); //斜めにぐるぐる回る処理x - y + で左回り コースによって使い分ける
-      //diff = diff * 1.2;
-      speed0 = 150;
-      done = steadyState(9500);//傾斜の計測できるといい
-      if ( done == 1 )
-        mode_G = 23;
+      if(A2)
+      {
+        if(colorCheck_G == 3) 
+          mode_G =23;
+        if(colorCheck_G == 1)//blue
+          mode_G =23;
+            if(colorCheck_G== 0){//red
+              diff = -0.02 * abs(compass.a.x) + 0.01 * abs(compass.a.y); //斜めにぐるぐる回る処理x - y + で左回り コースによって使い分ける
+              done = steadyState(9500);//傾斜の計測できるといい
+              if ( done == 1 )
+                mode_G = 23;
+            }
+      }else{
+        diff = -0.02 * abs(compass.a.x) + 0.01 * abs(compass.a.y); //斜めにぐるぐる回る処理x - y + で左回り コースによって使い分ける
+        //diff = diff * 1.2;
+        speed0 = 150;
+        done = steadyState(9500);//傾斜の計測できるといい
+        if ( done == 1 )
+          mode_G = 23;
+      }
       break;
       /*
          case 22 :
@@ -241,20 +253,34 @@ void zone3beta()
         mode_G = 1;
       break;
     case 14 ://赤を検知した直後の処理
-      speed0 = 130 ;
-      diff = 0.02 * compass.a.y;
-      //  diff = -0.02 * abs(compass.a.x) + 0.02 * abs(compass.a.y); //45度なら0に近くなる
-      // diff = -diff ;
-      diff = diff * 1.5;
-      if ((avex < LEVEL2) && (avex > -LEVEL2)) { // 下山たら方向転換
-        mode_G = 15;
+      if(A2)
+      {
+        diff = turnTo(A2red);
+        if(abs(diff)<=10)
+          mode_G = 0;
+      }else{
+        speed0 = 130 ;
+        diff = 0.02 * compass.a.y;
+        //  diff = -0.02 * abs(compass.a.x) + 0.02 * abs(compass.a.y); //45度なら0に近くなる
+        // diff = -diff ;
+        diff = diff * 1.5;
+        if ((avex < LEVEL2) && (avex > -LEVEL2)) { // 下山たら方向転換
+          mode_G = 15;
+        }
       }
       break;
-    case 15 :
+    case 15 ://青を検知した後の処理
       speed0 = 0 ;
       diff = 0 ;
       // if (dirFlag == 0)
       // {
+      /* if(A2)
+         {
+         diff = turnTo(50);
+         if(abs(diff)<=10)
+         mode_G = 0;
+         }*/
+      //else{
       switch (pointF)
       {
         case 0 :
@@ -266,47 +292,51 @@ void zone3beta()
       }
       if (pointF2)
         direction_target = directionIn + 180;
+
+      if(A2)
+        direction_target = A2blue;
       //if (direction_target > 361  )
       //direction_target -= 360 ;
       // dirFlag = 1;asffas
       //}
-      done = steadyState(1000);
-      if (done != 1)
+      // done = steadyState(1000);
+      //if (done != 1)
+      // {
+      diff =  turnTo(direction_target);
+      if (abs(diff) <= 10)
+        diff = 0 ;
+      //  } else {
+      switch (countTurn)
       {
-        diff =  turnTo(direction_target);
-        if (abs(diff) <= 50)
-          diff = 0 ;
-      } else {
-        switch (countTurn)
-        {
-          case 0 :
-            if (blueF) {
-              mode_G = 10;
-              countTurn = 1;
-            } else {
-              mode_G = 0 ;
-              pointF2 = 1 ;
-            }
-            break;
-          case 1 :
-            mode_G = 0;
-            pointF2 = 1;
-            break;
-        }
+        case 0 :
+          if (blueF) {
+            mode_G = 10;
+            countTurn = 1;
+          } else {
+            mode_G = 0 ;
+            pointF2 = 1 ;
+          }
+          break;
+        case 1 :
+          mode_G = 0;
+          pointF2 = 1;
+          break;
       }
-      break;
+ // }
+  //}
+  break;
     case 100:
-      eFlag = 1 ;
-      //speed0 = 0 ;
-      // diff = 0 ;
-      // mode_G = mode_Gs;
-      break;
+  eFlag = 1 ;
+  //speed0 = 0 ;
+  // diff = 0 ;
+  // mode_G = mode_Gs;
+  break;
     case 101:
-      eFlag = 0 ;
-      mode_G = mode_Gs ;
-      break;
+  eFlag = 0 ;
+  mode_G = mode_Gs ;
+  break;
     default:
-      break;
+  break;
   }
 
   if (redF == 0 && blueF == 0 )

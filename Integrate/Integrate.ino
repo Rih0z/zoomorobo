@@ -27,13 +27,16 @@ int distance_G;					//対象物との距離(cm)
 int dirmin_G;
 int dir_G;
 //riho
-int colorCheck_G ;
+int colorCheck_G = 3 ;
 float avex = 0;
 int identifyColor( int red, int green, int blue );
 void turnRight( int speed );
 void goStraight( int speed );
 int steadyState( unsigned long period );
 float turnTo(float dir);
+void zoneToZone(void);
+void zone_linetrace(void);
+void zone_curling(void);
 static int ChackC(void) ;
 static int CheckB(void);
 static int Mode_C = 2;
@@ -131,7 +134,7 @@ void loop() {
         zone_linetrace();
       }
       if (timeNow_G - timePrev_Z > 50000) {
-        diff = turnTo(90);
+        diff = turnTo(110);
         motorL_G = SPEED + diff;
         motorR_G = SPEED - diff;
         if ( diff < 10 ) { 
@@ -141,10 +144,33 @@ void loop() {
       }
       break;
     case 2:
+      if (timeNow_G - timePrev_Z < 50000){
       zone_curling(); 	//zone 2
+      }
+      if (timeNow_G - timePrev_Z > 50000) {
+        diff = turnTo(110);
+        motorL_G = SPEED + diff;
+        motorR_G = SPEED - diff;
+        if ( diff < 10 ) { 
+        zoneNumber_G = 0;
+        mode_G = 0;
+        }
+      }
       break;
     case 3:
+      if (timeNow_G - timePrev_Z < 50000){
       zone3beta();
+      }
+      if (timeNow_G - timePrev_Z > 50000) {
+        diff = turnTo(193);
+        motorL_G = SPEED + diff;
+        motorR_G = SPEED - diff;
+        if ( diff < 10 ) { 
+        zoneNumber_G = 0;
+        mode_G = 0;
+        }
+      }
+      break;
       //zone_curling();		//zone 3
       break;
     case 4:
@@ -207,7 +233,7 @@ void sendData()
   my = map(my,compass.m_min.y,compass.m_max.y,-100,100);
   mz = map(mz,compass.m_min.z,compass.m_max.z,-100,100);  
     write2byte((int)mx);  write2byte((int)my);  write2byte((int)mz); write2byte((int)direction_G);
-    Serial.write((int)colorcheck_G);
+    Serial.write((int)colorCheck_G);
    // Serial.write(zoneNumber_G);
    // Serial.write(mode_G);
    /* Serial.write((int)(100*direction_G) >> 8); // 100 倍して整数化(小数点 2 位まで送信)
