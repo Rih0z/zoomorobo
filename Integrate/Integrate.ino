@@ -3,6 +3,7 @@
 #include <Pushbutton.h>
 #include <LSM303.h>
 
+
 ZumoMotors motors;
 Pushbutton button(ZUMO_BUTTON);
 LSM303 compass;
@@ -176,10 +177,10 @@ void sendData()
 
     Serial.write(mode_G);
 
-    wirte2byte((int)(100 * direction_G));
+    write2byte((int)(100 * direction_G));
 
     Serial.write((int)colorCheck_G );
-    wirte2byte((int)(100 * avex));
+    write2byte((int)(100 * avex));
 
     timePrev = timeNow_G;
   }

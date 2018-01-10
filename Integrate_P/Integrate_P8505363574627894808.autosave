@@ -138,7 +138,7 @@ void DrawZoneTask() {
     stroke(0,0,0);
   }
   //各ゾーンタスクで必要な描画、処理 デバッグ用に3で固定
-  //zoneNumber = 3;
+  zoneNumber = 3;
   switch(zoneNumber) {
   case 1://linetrace
     if(drawcount==1){
@@ -255,31 +255,26 @@ void DrawZone3(){
   rect(width*0.65+10, height*0.41, 400, 40);
   fill(0);
  */
- //reove
-  stroke(255,255,255);
+ stroke(0,0,0);
   fill(255);
-  //colorCount
-  rect(width*0.5+40, height*0.87, 25, 30);
+  rect(width*0.5+40, height*0.9, 50, 100);
   fill(0);
   stroke(0,0,0);
-  //colorCheck_Gの初期値は3
+  text("color ", width*0.15, height*0.9);
   switch(colorCheck_G)
   {
     case 0 : 
-      //bluetext("blue", width*0.22, height*0.9);
+      //blue
       stroke(0,0,255);
-      fill(0,0,255);
+      text("blue", width*0.22, height*0.9);
       break;
-    case 1:
+    case 3:
       //red
       stroke(255,0,0);
-      fill(255,0,0);
+      text("red", width*0.22, height*0.9);
       break;
   }
-  ellipse(width * 0.22, height * 0.85 ,120,120);
-  fill(0);
   stroke(0,0,0);
-  text("checked", width*0.17, height*0.9);
   text("colorCount ", width*0.40, height*0.9);
   text((int)colorCount, width*0.50 + 40, height*0.9);
 }
