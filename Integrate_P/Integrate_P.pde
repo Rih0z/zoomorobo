@@ -309,141 +309,30 @@ void drawVec(float x, float y, float z) {
   text(y, CX, 490);  
   text(z, CX+80, 490);
 }
-
-// 通信方式1
-void serialEvent(Serial p) { 
-
-  if ( p.available() >= 23 ) { 
-    if ( p.read() == 'H' ) {
-      //RGB値
+int read2byte(Serial p) {
+  int x = p.read();  x <<= 8;   x |=p.read();
+  if (x>32757) x -= 65536;
+  return x;
+}
+void serialEvent(Serial p) {
+  if (p.available() >=23 ) {
+    if (p.read() == 'H') {
+      ax = read2byte(p);      ay = read2byte(p);      az = read2byte(p);
+      mx = read2byte(p);      my = read2byte(p);      mz = read2byte(p);
+      direc = read2byte(p);
+      colorcheck=p.read();
+      //RGB
       red =  p.read();
       green = p.read();
       blue =  p.read();
-      //地磁気
-      high = p.read();
-      low = p.read();
-      int d = (high << 8 ) + low;
-      if ( 32767 < d )
-        d -= 65536;
-      geomag_X = d;
-      high = p.read();
-      low = p.read();
-      d = (high << 8 ) + low;
-      if ( 32767 < d )
-        d -= 65536;
-      geomag_Y = d;
-      high = p.read();
-      low = p.read();
-      d = (high << 8 ) + low;
-      if ( 32767 < d )
-        d -= 65536;
-      geomag_Z = d;
-      //加速度
-      high = p.read();
-      low = p.read();
-      int ac = (high << 8 ) + low;
-      if ( 32767 < ac )
-        ac -= 65536;
-      accel_X = ac;
-      high = p.read();
-      low = p.read();
-      ac = (high << 8 ) + low;
-      if ( 32767 < ac )
-        ac -= 65536;
-      accel_Y = ac;
-      high = p.read();
-      low = p.read();
-      ac = (high << 8 ) + low;
-      if ( 32767 < ac )
-        ac -= 65536;
-      accel_Z = ac;
-      //motorspeed
-      /*high = p.read();
-        low = p.read();
-        int sp = (high << 8 ) + low;
-        motor_R = sp;
-
-        high = p.read();
-        low = p.read();
-        sp = (high << 8 ) + low;
-        motor_L = sp;
-       */
       motor_R = p.read();
       motor_L = p.read();
-
-      //超音波
-      //sonic = p.read();
-      //ゾーンナンバー
       zoneNumber = p.read();
-      //ゾーンタスク
       mode =  p.read();
-      //方角
-      high = p.read();
-      low = p.read();
-      d = (high << 8 ) + low;
-      if ( 36000 < d )
-        d -= 62303;
-      direction_G = (float)d / 100.0; // もともと100倍して送られていたので戻す
-
-      //何色を認識したか
-      colorCheck_G = p.read();
-      //傾き
-
-      high = p.read();
-      low = p.read();
-      d = (high << 8 ) + low;
-      if ( 36000 < d )
-        d -= 62303;
-      avex = (float)d / 100.0; // もともと100倍して送られていたので戻す
-      /*
-      //現在地
-      high = p.read();
-      low = p.read();
-      d = (high << 8 ) + low;
-      if ( 32767 < d )
-      //d -= 65536;
-      X_1 = (float)d/100.0;
-      high = p.read();
-      low = p.read();
-      d = (high << 8 ) + low;
-      if ( 32767 < d )
-      //d -= 65536;
-      Y_1 = (float)d/100.0;
-
-      //ライントレースしているかどうか
-      traceflag2 = p.read();
-      if(traceflag == 0){
-      traceflag = traceflag2;
-      drawcount=1;
-      //初期座標の代入
-      x_1 = X_1;
-      y_1 = Y_1;
-      }
-
-       */    
-
-      p.clear(); // 念のためクリア
+       p.clear(); // 念のためクリア
       p.write("A");
-      //コンソールに表示
-      //print("  RGB = ");
-      //println(red, green, blue);
-      /*  print("(geomag_X,geomag_Y,geomag_Z) = ");
-          println(geomag_X, geomag_Y, geomag_Z);
-          print("(accel_X,accel_Y,accel_Z) = ");
-          println(accel_Z, accel_Y, accel_Z);
-          print("motorspeed =(L,R)");
-          println(motor_L, motor_R);
-          print("ゾーンナンバー = ");
-          println(zoneNumber);
-          print("タスクナンバー = ");
-          println(mode);*/
-      print("X=");
-      print(X_1);
-      print("         Y=");
-      println(Y_1);
-      //print("Direction=");
-      //println(direction_G);
-      println(drawcount);
+      ++count;
+      println(count);
     }
   }
 }

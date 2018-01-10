@@ -56,6 +56,7 @@ static float Y = 0;     //過去のY座標
 static float Y_1 = 0;   //現在のY座標
 static int TurnC;
 static int POINT_F = 0;
+float diff;
 
 static int traceflag = 0;//ライントレースしているかどうか
 void setup()
@@ -92,14 +93,15 @@ void setup()
 void loop() {
   readRGB(); 				//カラーセンサでRGB値を取得(0-255)
   timeNow_G = millis() - timeInit_G; 	//経過時間
+  static unsigned long timePrev_Z = 0;
   motors.setSpeeds(motorL_G, motorR_G); 	//左右モーターへの回転力入力
-  direction_G = averageHeadingLP();	//Zumoが向いている角度を格納
+  direction_G = averageHeadingLP();	//Zumoが向いている角度を格
   sendData(); 				//データ送信
 
   //Zumo buttonが押されていればtrue，そうでなければ false
   if (button.isPressed()) {
     zoneNumber_G = 0; 		//zoneToZone に移行
-    mode_G = 2;
+    mode_G = 0;
     delay(100);
   }
 
@@ -121,12 +123,22 @@ void loop() {
 
   switch (zoneNumber_G) {
     case 0:
-      zone3beta();
-      //zoneToZone(); 		//zone to zone (start to zone)
+     timePrev_Z = timeNow_G;
+      zoneToZone(); 		//zone to zone (start to zone)
       break;
     case 1:
-      //zone_curling(); 	//zone 1
-      zone_linetrace();
+      if (timeNow_G - timePrev_Z < 50000){
+        zone_linetrace();
+      }
+      if (timeNow_G - timePrev_Z > 50000) {
+        diff = turnTo(90);
+        motorL_G = SPEED + diff;
+        motorR_G = SPEED - diff;
+        if ( diff < 10 ) { 
+        zoneNumber_G = 0;
+        mode_G = 0;
+        }
+      }
       break;
     case 2:
       zone_curling(); 	//zone 2
@@ -149,26 +161,61 @@ void sendData()
   static unsigned long timePrev = 0;
   static int inByte = 0;
   static float mx, my, mz;
+  static float V_L = 0.0;   //左タイヤの速さ
+  static float V_R = 0.0;   //右タイヤの速さ
+  static float V_C = 0.0;   //中心の速さ
+  static float V_x = 0.0;   //中心の速さのx方向成分
+  static float V_x1 = 0.0;  //x方向成分の1つ先
+  static float V_y = 0.0;   //中心の速さのy方向成分
+  static float V_y1 = 0.0;  //y方向成分の1つ先
+  static float dt = 0.05; //0.1秒ごとに現在位置を更新
+  static float X = 0.0;     //過去のX座標
+  static float X_1 = 0.0;   //現在のX座標
+  static float Y = 0.0;     //過去のY座標
+  static float Y_1 = 0.0;   //現在のY座標
+  
+  
   // 50msごとにデータ送信（通信方式２），500msデータ送信要求なし-->データ送信．
   if ( inByte == 0 || timeNow_G - timePrev > 500 || (Serial.available() > 0 && timeNow_G - timePrev > 50)) { // 50msごとにデータ送信
     inByte = Serial.read();
     inByte = 1;
     // Serial.print(direction_G);
 
+    dt = ((float)timeNow_G - (float)timePrev) / 1000.0;
+    //Serial.println(direction_G);
+    V_L = (float)motorL_G;
+    V_R = (float)motorR_G;
+    V_C = (V_L + V_R) / 2.0; //中心の速度
+
+    V_x = V_x1; //過去のx成分、y成分
+    V_y = V_y1;
+
+    V_x1 = V_C * cos( ((float)direction_G * 3.14) / 180.0);
+    V_y1 = V_C * sin( ((float)direction_G * 3.14) / 180.0);
+
+    X = X_1; //通過後の地点
+    Y = Y_1; //
+
+    X_1 = X + (0.5 * (V_x1 + V_x)) * dt;  //現在のX座標
+    Y_1 = Y + (0.5 * (V_y1 + V_y)) * dt;  //現在のY座標
+
+ 
     Serial.write('H');
+    write2byte(compass.a.x);  write2byte(compass.a.y);  write2byte(compass.a.z);
+    mx = compass.m.x;  my = compass.m.y;  mz = compass.m.z;
+    mx = map(mx,compass.m_min.x,compass.m_max.x,-100,100);
+  my = map(my,compass.m_min.y,compass.m_max.y,-100,100);
+  mz = map(mz,compass.m_min.z,compass.m_max.z,-100,100);  
+    write2byte((int)mx);  write2byte((int)my);  write2byte((int)mz); write2byte((int)direction_G);
+    Serial.write((int)colorcheck_G);
+   // Serial.write(zoneNumber_G);
+   // Serial.write(mode_G);
+   /* Serial.write((int)(100*direction_G) >> 8); // 100 倍して整数化(小数点 2 位まで送信)
+    Serial.write((int)(100*direction_G) & 255); // 整数化した時の値が-32768∼32767 の範囲*/
 
     Serial.write((int)red_G );
     Serial.write((int)green_G );
     Serial.write((int)blue_G );
-
-
-    mx = compass.m.x;  my = compass.m.y;  mz = compass.m.z;
-    mx = map(mx, compass.m_min.x, compass.m_max.x, -100, 100);
-    my = map(my, compass.m_min.y, compass.m_max.y, -100, 100);
-    mz = map(mz, compass.m_min.z, compass.m_max.z, -100, 100);
-    write2byte((int)mx);  write2byte((int)my);  write2byte((int)mz);
-
-    write2byte(compass.a.x);  write2byte(compass.a.y);  write2byte(compass.a.z);
 
     Serial.write(motorR_G );
     Serial.write(motorL_G );
@@ -176,11 +223,6 @@ void sendData()
     Serial.write(zoneNumber_G);
 
     Serial.write(mode_G);
-
-    write2byte((int)(100 * direction_G));
-
-    Serial.write((int)colorCheck_G );
-    write2byte((int)(100 * avex));
 
     timePrev = timeNow_G;
   }

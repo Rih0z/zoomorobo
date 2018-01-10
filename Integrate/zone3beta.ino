@@ -26,6 +26,7 @@ float turnTo(float dir) {
 }
 void zone3beta()
 {
+  static int zoneNF = 0 ;
   static int pointF2 = 0 ;
   static int eFlag = 0 ;
   static int blackF = 0 ;
@@ -53,11 +54,20 @@ void zone3beta()
   static int turnFlag = 0 ;
   Serial.println("avex");
   Serial.println(avex);
+  Serial.print("direction_G");
+  Serial.println(direction_G);
   if (firstF == 0)
   {
     firstF = 1;
     // mode_Gs = mode_G
     mode_G = 0 ;
+  }
+  if(zoneNF == 0)
+  {
+    zoneNF = 1;
+    diff =  turnTo(110);
+    if (abs(diff) <= 50)
+      diff = 0 ;
   }
   if (blackF)
     CheckB();
@@ -66,9 +76,19 @@ void zone3beta()
   switch ( mode_G ) {
     case 0: // setupはここ
       countTurn = 0;
-      mode_G = 1;
       pointF = 0;
       blackF = 1;
+      if(zoneNF == 0)
+      {
+        zoneNF = 1;
+        diff =  turnTo(110);
+        if (abs(diff) <= 10){
+          diff = 0 ;
+          mode_G = 1;
+        }
+      }else{
+        mode_G = 1;
+      }
       break;
     case 1: // 山探し(ここでは直進)
       if (avex > SROPE ) { // 登り始めたら
@@ -131,15 +151,15 @@ void zone3beta()
       if ( done == 1 )
         mode_G = 23;
       break;
-    /*
-      case 22 :
-      speed0 = 150;
-      diff = 0.01 * abs(compass.a.x) - 0.02 * abs(compass.a.y);
-      done = steadyState(7500);
-      if ( done == 1 )
-      mode_G = 23;
-      break;
-    */
+      /*
+         case 22 :
+         speed0 = 150;
+         diff = 0.01 * abs(compass.a.x) - 0.02 * abs(compass.a.y);
+         done = steadyState(7500);
+         if ( done == 1 )
+         mode_G = 23;
+         break;
+       */
     case 23: // 山登り中
       if ((avex < LEVEL) && (avex > -LEVEL)) { // 登頂したら頂上の中心部まで進む
         // done = steadyState(150);        // 200ms は要調整
@@ -174,7 +194,7 @@ void zone3beta()
         mode_G = 15;
       }
       break;
-    //下る いい感じに斜めに
+      //下る いい感じに斜めに
     case 10 ://青を認識した直後
       speed0 = 130;
       diff = 0.02 * abs(compass.a.y) - 0.02 * abs(compass.a.x); //45度なら0に近くなる
@@ -295,6 +315,8 @@ void zone3beta()
   {
     motorL_G = speed0 + diff;
     motorR_G = speed0 - diff;
+    // motorL_G = 0 ;
+    // motorR_G = 0 :
   }
 }
 
@@ -385,10 +407,10 @@ static int CheckB(void)
       }
 
       /*  turnRight(SPEED*2);
-        if (!identifyColor( 255, 255, 255 )) { // �������m
-          //minDistance = 9999999; // identifyZone()�֐��Ŏg���ϐ��̏�����
-          mode_G = 2;
-        }*/
+          if (!identifyColor( 255, 255, 255 )) { // �������m
+      //minDistance = 9999999; // identifyZone()�֐��Ŏg���ϐ��̏�����
+      mode_G = 2;
+      }*/
 
       break;
   }
