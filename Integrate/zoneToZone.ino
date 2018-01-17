@@ -26,10 +26,10 @@ void zoneToZone(){
 	 	mode_G = 1;
 	 	break;
 	case 1: //direction_targetの方向を向く
-	  	direction_target = direction_exit[ zoneNumber_in-1 ]; 
-		if(turnToDirection(direction_target)){ 		//各自で作成
+	  	//direction_target = direction_exit[ zoneNumber_in-1 ]; 
+		//if(turnToDirection(direction_target)){ 		//各自で作成
 	  		mode_G = 2;
-	  	} 						//とりあえず，無条件にmode_Gの値を更新
+	  	//} 						//とりあえず，無条件にmode_Gの値を更新
 	  	break;
 	case 2: //黄を検知するまで直進
 		goStraight( SPEED );

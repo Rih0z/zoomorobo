@@ -104,25 +104,9 @@ void loop() {
   //Zumo buttonが押されていればtrue，そうでなければ false
   if (button.isPressed()) {
     zoneNumber_G = 0; 		//zoneToZone に移行
-    mode_G = 0;
+    mode_G = 2;
     delay(100);
   }
-
-  //実験のために措置的に設定
-  //zoneNumber_G = 2;
-
-  /*static unsigned long tp = timeNow_G;
-
-    //規定時間が経過したら次のゾーンに向かう
-    if(zoneNumber_G != 0){
-  	if(timeNow_G - tp > 9999999999999999999999){
-  		zoneNumber_G = 0;
-  		mode_G = 0;
-  	}
-    }
-    else{
-  	tp = timeNow_G;
-    }*/
 
   switch (zoneNumber_G) {
     case 0:
@@ -144,9 +128,9 @@ void loop() {
       }
       break;
     case 2:
-      if (timeNow_G - timePrev_Z < 50000){
+//      if (timeNow_G - timePrev_Z < 50000){
       zone_curling(); 	//zone 2
-      }
+  /*    }
       if (timeNow_G - timePrev_Z > 50000) {
         diff = turnTo(110);
         motorL_G = SPEED + diff;
@@ -156,6 +140,7 @@ void loop() {
         mode_G = 0;
         }
       }
+      */
       break;
     case 3:
       if (timeNow_G - timePrev_Z < 50000){
@@ -174,7 +159,7 @@ void loop() {
       //zone_curling();		//zone 3
       break;
     case 4:
-      //zone_linetrace(); 	//winning action
+      winning_action(); 	//winning action
       break;
     default:
       break;

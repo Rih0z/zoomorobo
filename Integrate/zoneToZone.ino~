@@ -27,8 +27,9 @@ void zoneToZone(){
 	 	break;
 	case 1: //direction_targetの方向を向く
 	  	direction_target = direction_exit[ zoneNumber_in-1 ]; 
-		if(turnToDirection( direction_target)) 		//各自で作成
-	  		mode_G = 2; 				//とりあえず，無条件にmode_Gの値を更新
+		//if(turnToDirection(direction_target)){ 		//各自で作成
+	  		mode_G = 2;
+	  	//} 						//とりあえず，無条件にmode_Gの値を更新
 	  	break;
 	case 2: //黄を検知するまで直進
 		goStraight( SPEED );
@@ -177,4 +178,15 @@ int identifyColor(int red, int green, int blue){
 	return 1;
   else
 	return 0;
+}
+int identifyColor2( int red, int green, int blue, int value )
+{
+  float d2;
+  float d2_max = value; // パラメーター
+
+  d2 = pow(red - red_G, 2) + pow(green - green_G, 2) + pow(blue - blue_G, 2);
+  if ( d2 < d2_max * d2_max )
+    return 1;
+  else
+    return 0;
 }

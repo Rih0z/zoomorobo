@@ -26,7 +26,9 @@ float turnTo(float dir) {
 }
 void zone3beta()
 {
-  static int A2 = 1;//方向をセットするアルゴリズムで行く場合1に
+  static int side_d = 10;
+  static int counttimes;
+  static int A2 = 0;//方向をセットするアルゴリズムで行く場合1に
   static int A2blue = 50;
   static int A2in = 110;
   static int A2gol = 193;
@@ -35,7 +37,7 @@ void zone3beta()
   static int pointF2 = 0 ;
   static int eFlag = 0 ;
   static int blackF = 0 ;
-  static int countTurn = 0;
+  static int countTurn = 0; 
   static int dirFlag;
   float direction_target;
   int done;
@@ -72,6 +74,34 @@ void zone3beta()
 
 
   switch ( mode_G ) {
+    case 32:
+      blackF = 0 ;
+      turnRight(-150);
+
+      if(turnToDirection(side_d) == 1){
+        mode_G = 33;
+      }
+      break;
+
+      //黒を検知するまで直進
+    case 33:
+      goStraight(150);
+      if(identifyColor(0,0,0)){
+        mode_G = 34;
+      }
+      break;
+
+      //ゾーンの中心に到着するまで後退
+    case 34:
+      //現状適当な値
+      done = steadyState(1800);
+
+      goStraight(-150);
+
+      if(done == 1){
+        mode_G = 0;
+      }
+      break;
     case 0: // setupはここ
       countTurn = 0;
       pointF = 0;
@@ -148,18 +178,18 @@ void zone3beta()
           mode_G =23;
         if(colorCheck_G == 1)//blue
           mode_G =23;
-            if(colorCheck_G== 0){//red
-              diff = -0.02 * abs(compass.a.x) + 0.01 * abs(compass.a.y); //斜めにぐるぐる回る処理x - y + で左回り コースによって使い分ける
-              done = steadyState(9500);//傾斜の計測できるといい
-              if ( done == 1 )
-                mode_G = 23;
-            }
+        if(colorCheck_G== 0){//red
+          diff = -0.02 * abs(compass.a.x) + 0.01 * abs(compass.a.y); //斜めにぐるぐる回る処理x - y + で左回り コースによって使い分ける
+          done = steadyState(9500);//傾斜の計測できるといい
+          if ( done == 1 )
+            mode_G = 23;
+        }
       }else{
         diff = -0.02 * abs(compass.a.x) + 0.01 * abs(compass.a.y); //斜めにぐるぐる回る処理x - y + で左回り コースによって使い分ける
         //diff = diff * 1.2;
         speed0 = 150;
-        done = steadyState(9500);//傾斜の計測できるといい
-        if ( done == 1 )
+        done = steadyState(5500);//傾斜の計測できるといい
+        if ( done == 1 || counttimes == 0  )
           mode_G = 23;
       }
       break;
@@ -253,6 +283,7 @@ void zone3beta()
         mode_G = 1;
       break;
     case 14 ://赤を検知した直後の処理
+counttimes++;
       if(A2)
       {
         diff = turnTo(A2red);
@@ -270,6 +301,7 @@ void zone3beta()
       }
       break;
     case 15 ://青を検知した後の処理
+counttimes++;
       speed0 = 0 ;
       diff = 0 ;
       // if (dirFlag == 0)
@@ -322,21 +354,21 @@ void zone3beta()
           pointF2 = 1;
           break;
       }
- // }
-  //}
-  break;
+      // }
+      //}
+      break;
     case 100:
-  eFlag = 1 ;
-  //speed0 = 0 ;
-  // diff = 0 ;
-  // mode_G = mode_Gs;
-  break;
+      eFlag = 1 ;
+      //speed0 = 0 ;
+      // diff = 0 ;
+      // mode_G = mode_Gs;
+      break;
     case 101:
-  eFlag = 0 ;
-  mode_G = mode_Gs ;
-  break;
+      eFlag = 0 ;
+      mode_G = mode_Gs ;
+      break;
     default:
-  break;
+      break;
   }
 
   if (redF == 0 && blueF == 0 )
@@ -447,7 +479,7 @@ static int CheckB(void)
   return 0 ;
 }
 static int ChackC(void) {
-  if ( identifyColor( 9, 35 , 80  ) ) //青を検知したら
+  if ( identifyColor(25,38,107) ) //青を検知したら
   {
     tone(3, 262, 300);
     mode_G = 15;
@@ -455,7 +487,7 @@ static int ChackC(void) {
     return 0;
 
   }
-  if ( identifyColor( 123, 31 , 24  ) ) //赤を検知したら
+  if ( identifyColor(169,36,16) ) //赤を検知したら
   {
     tone(3, 262, 300);
     mode_G = 14;
